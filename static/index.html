@@ -1,50 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Simple Chat</title>
-</head>
-<body onload="getName()">
-
-  <div id="namePrompt" style="position:fixed;top:0;left:0;width:100%;height:100%;background:white;z-index:1000;text-align:center;padding-top:100px;">
-    <h2>Enter Your Name</h2>
-    <input type="text" id="nameInput" placeholder="Your name">
-    <button onclick="setName()">Join Chat</button>
-  </div>
-
-<div id="chatUI" style="display:flex; gap:20px;">
-  <div style="flex: 1;">
-    <h2>Chat Room</h2>
-    <div id="chatBox" style="height:300px;overflow:auto;border:1px solid gray;padding:5px;"></div>
-    <input type="text" id="msgInput">
-    <button onclick="sendMessage()">Send</button>
-  </div>
-  <div style="width:200px;">
-    <h3>Users</h3>
-    <div id="userList" style="border:1px solid gray; padding:5px; height:300px; overflow:auto;"></div>
-  </div>
-</div>
-
-
-  <script src="script.js"></script>
-</body>
-</h<!DOCTYPE html>
-<html lang="en">
-<head>
     <meta charset="UTF-8">
     <title>Chat Room</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body { font-family: Arial, sans-serif; background: #f2f2f2; padding: 20px; }
+        #chat-box { border: 1px solid #ccc; height: 300px; overflow-y: scroll; padding: 10px; background: #fff; }
+        #chat-section { display: none; }
+    </style>
 </head>
 <body>
     <div id="login-section">
-        <h2>Enter Your Name</h2>
+        <h2>Enter Chat</h2>
         <input type="text" id="username" placeholder="Your name">
         <button onclick="joinChat()">Join Chat</button>
     </div>
 
-    <div id="chat-section" style="display:none;">
+    <div id="chat-section">
         <h2>Chat Room</h2>
-        <div id="user-list"></div>
         <div id="chat-box"></div>
         <input type="text" id="message-input" placeholder="Type a message">
         <button onclick="sendMessage()">Send</button>
@@ -53,4 +26,3 @@
     <script src="script.js"></script>
 </body>
 </html>
-
