@@ -101,7 +101,10 @@ function displayMessage(msg) {
   msgBox.appendChild(line);
 let socket;
 let username = "";
-let roomId = "room123"; // You can make this dynamic from the URL if you want
+let urlParts = window.location.pathname.split('/');
+let roomId = urlParts[urlParts.length - 1] || "default";
+
+}
 
 function joinChat() {
     username = document.getElementById("username").value.trim();
@@ -115,7 +118,9 @@ function joinChat() {
     document.getElementById("chat-section").style.display = "block";
 
     // Connect WebSocket
-    socket = new WebSocket(`wss://${window.location.host}/ws/${roomId}`);
+   let protocol = window.location.protocol === "https:" ? "wss" : "ws";
+socket = new WebSocket(`${protocol}://${window.location.host}/ws/${roomId}`);
+
 
     socket.onopen = () => {
         // Send the username first

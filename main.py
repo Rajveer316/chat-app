@@ -14,10 +14,11 @@ rooms = {}
 usernames = {}
 
 # Serve index.html at root "/"
-@app.get("/", response_class=HTMLResponse)
-async def get_index():
+@app.get("/{room_id}", response_class=HTMLResponse)
+async def get_index(room_id: str):
     with open("static/index.html") as f:
-        return HTMLResponse(f.read())
+        return HTMLResponse(content=f.read())
+
 
 @app.websocket("/ws/{room_id}")
 async def websocket_endpoint(websocket: WebSocket, room_id: str):
