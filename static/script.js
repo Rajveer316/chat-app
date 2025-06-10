@@ -1,46 +1,49 @@
-let socket;
+let ws;
 let username = "";
-let roomId = window.location.pathname.split('/').pop(); // Extract room name from URL
+let roomId = window.location.pathname.split("/")[1];
 
-function joinChat() {
-    username = document.getElementById("username").value.trim();
+document.getElementById("joinBtn").onclick = function () {
+    const nameInput = document.getElementById("nameInput");
+    username = nameInput.value.trim();
+
     if (!username) {
-        alert("Please enter your name!");
+        alert("Please enter your name.");
         return;
     }
 
-    document.getElementById("login-section").style.display = "none";
-    document.getElementById("chat-section").style.display = "block";
+    document.getElementById("joinScreen").style.display = "none";
+    document.getElementById("chatScreen").style.display = "block";
 
-    const protocol = window.location.protocol === "https:" ? "wss" : "ws";
-    socket = new WebSocket(`${protocol}://${window.location.host}/ws/${roomId}`);
+    connectWebSocket();
+};
 
-    socket.onopen = () => {
-        socket.send(username); // Send username first
+function connectWebSocket() {
+    ws = new WebSocket(`wss://${window.location.host}/ws/${roomId}`);
+
+    ws.onopen = () => {
+        ws.send(username); // Send username as the first message
     };
 
-    socket.onmessage = (event) => {
+    ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
+        const chatBox = document.getElementById("chatBox");
 
         if (data.type === "chat") {
-            document.getElementById("chat-box").innerHTML += `<p><strong>${data.from}:</strong> ${data.message}</p>`;
+            chatBox.innerHTML += `<div><strong>${data.from}:</strong> ${data.message}</div>`;
         } else if (data.type === "notification") {
-            document.getElementById("chat-box").innerHTML += `<p><em>${data.message}</em></p>`;
+            chatBox.innerHTML += `<div style="color: gray;"><em>${data.message}</em></div>`;
         }
 
-        document.getElementById("chat-box").scrollTop = document.getElementById("chat-box").scrollHeight;
-    };
-
-    socket.onerror = (error) => {
-        console.error("WebSocket error:", error);
+        chatBox.scrollTop = chatBox.scrollHeight;
     };
 }
 
-function sendMessage() {
-    const input = document.getElementById("message-input");
-    const message = input.value.trim();
-    if (message && socket) {
-        socket.send(message);
-        input.value = "";
-    }
-}
+document.getElementById("sendBtn").onclick = function () {
+    const messageInput = document.getElementById("messageInput");
+    const message = messageInput.value.trim();
+
+    if (!message) return;
+
+    ws.send(message);
+    messageInput.value = "";
+};

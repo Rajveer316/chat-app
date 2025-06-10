@@ -1,49 +1,65 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
-from typing import List, Dict
+from typing import Dict, List
 
 app = FastAPI()
 
+# Mount the static directory to serve HTML, CSS, JS
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# Store connected users per room
+# Store chat room connections and usernames
 rooms: Dict[str, List[WebSocket]] = {}
 usernames: Dict[WebSocket, str] = {}
 
 @app.get("/{room_id}", response_class=HTMLResponse)
 async def get_room(room_id: str):
-    with open("static/index.html") as f:
-        return HTMLResponse(content=f.read())
+    # Serve the chat UI for a specific room
+    with open("static/index.html", "r") as f:
+        html = f.read()
+    return HTMLResponse(content=html)
 
 @app.websocket("/ws/{room_id}")
 async def websocket_endpoint(websocket: WebSocket, room_id: str):
     await websocket.accept()
-    
-    # Add user to room
+
+    # Create a new room if it doesn't exist
     if room_id not in rooms:
         rooms[room_id] = []
+
     rooms[room_id].append(websocket)
 
     try:
-        # First message should be the username
-        init_data = await websocket.receive_text()
-        username = init_data.strip()
+        # First message is username
+        username = await websocket.receive_text()
         usernames[websocket] = username
 
-        # Notify others
+        # Notify others that someone joined
         for client in rooms[room_id]:
             if client != websocket:
-                await client.send_json({"type": "notification", "message": f"{username} entered the chatroom."})
+                await client.send_json({
+                    "type": "notification",
+                    "message": f"{username} entered the chatroom."
+                })
 
+        # Chat loop
         while True:
-            data = await websocket.receive_text()
+            message = await websocket.receive_text()
             for client in rooms[room_id]:
-                await client.send_json({"type": "chat", "from": username, "message": data})
+                await client.send_json({
+                    "type": "chat",
+                    "from": username,
+                    "message": message
+                })
 
     except WebSocketDisconnect:
         rooms[room_id].remove(websocket)
-        left_user = usernames.get(websocket, "Someone")
-        for client in rooms[room_id]:
-            await client.send_json({"type": "notification", "message": f"{left_user} left the chatroom."})
+        left_username = usernames.get(websocket, "Someone")
         usernames.pop(websocket, None)
+
+        # Notify others that user left
+        for client in rooms[room_id]:
+            await client.send_json({
+                "type": "notification",
+                "message": f"{left_username} left the chatroom."
+            })
