@@ -28,4 +28,29 @@
 
   <script src="script.js"></script>
 </body>
+</h<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat Room</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="login-section">
+        <h2>Enter Your Name</h2>
+        <input type="text" id="username" placeholder="Your name">
+        <button onclick="joinChat()">Join Chat</button>
+    </div>
+
+    <div id="chat-section" style="display:none;">
+        <h2>Chat Room</h2>
+        <div id="user-list"></div>
+        <div id="chat-box"></div>
+        <input type="text" id="message-input" placeholder="Type a message">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
 </html>
+

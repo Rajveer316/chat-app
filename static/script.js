@@ -99,5 +99,60 @@ function displayMessage(msg) {
   const line = document.createElement("div");
   line.innerHTML = `<b>[${msg.user}]</b> ${msg.message} <span style="font-size:12px;color:gray;">(${msg.timestamp})</span>`;
   msgBox.appendChild(line);
-  msgBox.scrollTop = msgBox.scrollHeight;
+let socket;
+let username = "";
+let roomId = "room123"; // You can make this dynamic from the URL if you want
+
+function joinChat() {
+    username = document.getElementById("username").value.trim();
+    if (!username) {
+        alert("Please enter your name!");
+        return;
+    }
+
+    // Hide login, show chat
+    document.getElementById("login-section").style.display = "none";
+    document.getElementById("chat-section").style.display = "block";
+
+    // Connect WebSocket
+    socket = new WebSocket(`wss://${window.location.host}/ws/${roomId}`);
+
+    socket.onopen = () => {
+        // Send the username first
+        socket.send(JSON.stringify({ username: username }));
+    };
+
+    socket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+
+        if (data.type === "chat") {
+            document.getElementById("chat-box").innerHTML += `<p><strong>${data.from}:</strong> ${data.message}</p>`;
+            // Send read receipt
+            socket.send(JSON.stringify({ type: "read" }));
+        } else if (data.type === "notification") {
+            document.getElementById("chat-box").innerHTML += `<p><em>${data.message}</em></p>`;
+            updateUserList(data.users);
+        } else if (data.type === "read") {
+            document.getElementById("chat-box").innerHTML += `<p><em>${data.from} read the message</em></p>`;
+        }
+    };
+
+    socket.onclose = () => {
+        alert("Disconnected from server.");
+    };
 }
+
+function sendMessage() {
+    const input = document.getElementById("message-input");
+    const message = input.value.trim();
+    if (message && socket) {
+        socket.send(JSON.stringify({ message: message }));
+        input.value = "";
+    }
+}
+
+function updateUserList(users) {
+    const userList = document.getElementById("user-list");
+    userList.innerHTML = "<strong>Active users:</strong><br>" + users.map(u => `• ${u}`).join("<br>");
+}
+
